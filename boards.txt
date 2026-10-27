@@ -1,0 +1,58 @@
+# =============================================================================
+#  arduino-wch-ch579 - boards.txt
+#  Placas con WCH CH579 (Cortex-M0, BLE, Ethernet 10M, USB)
+# =============================================================================
+
+menu.clock=Reloj del sistema
+menu.opt=Optimizacion
+menu.jlinkspeed=Velocidad SWD (J-Link)
+
+# -----------------------------------------------------------------------------
+#  CH579M - placa de desarrollo V1.6 (CH340N + RJ45 HR911105A + USB)
+# -----------------------------------------------------------------------------
+ch579m.name=WCH CH579M (placa de desarrollo V1.6)
+
+ch579m.build.core=arduino
+ch579m.build.board=CH579M_V16
+ch579m.build.variant=ch579m_v16
+ch579m.build.ldscript=ch579.ld
+ch579m.build.mcu=cortex-m0
+ch579m.build.series=CH579
+ch579m.build.extra_flags=
+
+ch579m.upload.tool=jlink
+ch579m.upload.tool.default=jlink
+ch579m.upload.protocol=jlink
+ch579m.upload.require_upload_port=false
+ch579m.upload.maximum_size=256000
+ch579m.upload.maximum_data_size=32768
+ch579m.upload.jlink_device=CH579M
+
+ch579m.debug.jlink_device=CH579M
+
+# --- Reloj ---
+ch579m.menu.clock.hse32=Cristal externo 32 MHz (HSE)
+ch579m.menu.clock.hse32.build.f_cpu=32000000
+ch579m.menu.clock.hse32.build.clock_source=CH579_CLOCK_HSE_32MHZ
+ch579m.menu.clock.pll40=PLL 40 MHz (desde el cristal)
+ch579m.menu.clock.pll40.build.f_cpu=40000000
+ch579m.menu.clock.pll40.build.clock_source=CH579_CLOCK_PLL_40MHZ
+ch579m.menu.clock.hsi32=RC interno 32 MHz (HSI, sin cristal)
+ch579m.menu.clock.hsi32.build.f_cpu=32000000
+ch579m.menu.clock.hsi32.build.clock_source=CH579_CLOCK_HSI_32MHZ
+
+# --- Optimizacion ---
+ch579m.menu.opt.os=Tamano (-Os)
+ch579m.menu.opt.os.build.flags.optimize=-Os
+ch579m.menu.opt.o2=Velocidad (-O2)
+ch579m.menu.opt.o2.build.flags.optimize=-O2
+ch579m.menu.opt.og=Depuracion (-Og)
+ch579m.menu.opt.og.build.flags.optimize=-Og -g3
+
+# --- Velocidad SWD del J-Link (kHz) ---
+ch579m.menu.jlinkspeed.4000=4000 kHz
+ch579m.menu.jlinkspeed.4000.upload.jlink_speed=4000
+ch579m.menu.jlinkspeed.1000=1000 kHz
+ch579m.menu.jlinkspeed.1000.upload.jlink_speed=1000
+ch579m.menu.jlinkspeed.200=200 kHz (cables largos)
+ch579m.menu.jlinkspeed.200.upload.jlink_speed=200

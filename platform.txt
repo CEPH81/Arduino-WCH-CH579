@@ -1,0 +1,113 @@
+# =============================================================================
+#  arduino-wch-ch579 - platform.txt
+#  Especificacion: https://arduino.github.io/arduino-cli/latest/platform-specification/
+# =============================================================================
+
+name=WCH CH57x (ARM Cortex-M0)
+version=0.1.0
+
+# -----------------------------------------------------------------------------
+#  Compilador: arm-none-eabi-gcc
+#  Por defecto se usa el que instala el Gestor de Placas de Arduino (por ejemplo
+#  al instalar "Arduino SAMD Boards"). Para usar otro, cree platform.local.txt
+#  con:  compiler.path=C:/ruta/al/toolchain/bin/
+# -----------------------------------------------------------------------------
+compiler.path={runtime.tools.arm-none-eabi-gcc.path}/bin/
+compiler.c.cmd=arm-none-eabi-gcc
+compiler.cpp.cmd=arm-none-eabi-g++
+compiler.S.cmd=arm-none-eabi-gcc
+compiler.c.elf.cmd=arm-none-eabi-g++
+compiler.ar.cmd=arm-none-eabi-ar
+compiler.objcopy.cmd=arm-none-eabi-objcopy
+compiler.elf2hex.cmd=arm-none-eabi-objcopy
+compiler.size.cmd=arm-none-eabi-size
+
+compiler.warning_flags=-w
+compiler.warning_flags.none=-w
+compiler.warning_flags.default=
+compiler.warning_flags.more=-Wall
+compiler.warning_flags.all=-Wall -Wextra
+
+build.flags.optimize=-Os
+# "Optimizar para depuracion" del IDE 2.x usa compiler.optimization_flags.debug
+compiler.optimization_flags={build.flags.optimize}
+compiler.optimization_flags.release={build.flags.optimize}
+compiler.optimization_flags.debug=-Og -g3
+build.clock_source=CH579_CLOCK_HSE_32MHZ
+
+build.cpu_flags=-mcpu={build.mcu} -mthumb
+build.ch579_defines=-DF_CPU={build.f_cpu} -DFREQ_SYS={build.f_cpu} -D{build.clock_source} -D{build.series} -DARDUINO={runtime.ide.version} -DARDUINO_{build.board} -DARDUINO_ARCH_{build.arch}
+build.ch579_includes="-I{build.core.path}/api/deprecated" "-I{build.core.path}/api/deprecated-avr-comp" "-I{build.core.path}/sdk/inc" "-I{build.core.path}/sdk/cmsis"
+
+compiler.c.flags=-c {compiler.optimization_flags} -g {compiler.warning_flags} -std=gnu11 -ffunction-sections -fdata-sections -nostdlib --param max-inline-insns-single=500 -MMD
+compiler.cpp.flags=-c {compiler.optimization_flags} -g {compiler.warning_flags} -std=gnu++14 -ffunction-sections -fdata-sections -fno-threadsafe-statics -nostdlib --param max-inline-insns-single=500 -fno-rtti -fno-exceptions -MMD
+compiler.S.flags=-c -g -x assembler-with-cpp -MMD
+compiler.c.elf.flags={compiler.optimization_flags} -Wl,--gc-sections -Wl,--no-wchar-size-warning
+compiler.ar.flags=rcs
+compiler.objcopy.eep.flags=-O ihex
+compiler.elf2hex.flags=-O ihex
+compiler.elf2bin.flags=-O binary
+
+# Ganchos para agregar opciones desde platform.local.txt
+compiler.c.extra_flags=
+compiler.cpp.extra_flags=
+compiler.S.extra_flags=
+compiler.c.elf.extra_flags=
+compiler.ar.extra_flags=
+compiler.libraries.ldflags=
+
+# -----------------------------------------------------------------------------
+#  Recetas de compilacion
+# -----------------------------------------------------------------------------
+recipe.c.o.pattern="{compiler.path}{compiler.c.cmd}" {compiler.c.flags} {build.cpu_flags} {build.ch579_defines} {build.extra_flags} {compiler.c.extra_flags} {build.ch579_includes} {includes} "{source_file}" -o "{object_file}"
+
+recipe.cpp.o.pattern="{compiler.path}{compiler.cpp.cmd}" {compiler.cpp.flags} {build.cpu_flags} {build.ch579_defines} {build.extra_flags} {compiler.cpp.extra_flags} {build.ch579_includes} {includes} "{source_file}" -o "{object_file}"
+
+recipe.S.o.pattern="{compiler.path}{compiler.S.cmd}" {compiler.S.flags} {build.cpu_flags} {build.ch579_defines} {build.extra_flags} {compiler.S.extra_flags} {build.ch579_includes} {includes} "{source_file}" -o "{object_file}"
+
+recipe.ar.pattern="{compiler.path}{compiler.ar.cmd}" {compiler.ar.flags} {compiler.ar.extra_flags} "{archive_file_path}" "{object_file}"
+
+recipe.c.combine.pattern="{compiler.path}{compiler.c.elf.cmd}" {build.cpu_flags} {compiler.c.elf.flags} {compiler.c.elf.extra_flags} "-T{build.variant.path}/{build.ldscript}" "-Wl,-Map,{build.path}/{build.project_name}.map" --specs=nano.specs -o "{build.path}/{build.project_name}.elf" "-L{build.path}" -Wl,--start-group {object_files} {compiler.libraries.ldflags} "{archive_file_path}" -lm -lc -lgcc -Wl,--end-group
+
+recipe.objcopy.hex.pattern="{compiler.path}{compiler.elf2hex.cmd}" {compiler.elf2hex.flags} "{build.path}/{build.project_name}.elf" "{build.path}/{build.project_name}.hex"
+recipe.objcopy.bin.pattern="{compiler.path}{compiler.elf2hex.cmd}" {compiler.elf2bin.flags} "{build.path}/{build.project_name}.elf" "{build.path}/{build.project_name}.bin"
+
+# Exportar binario compilado (Programa > Exportar binario compilado)
+recipe.output.tmp_file={build.project_name}.hex
+recipe.output.save_file={build.project_name}.{build.variant}.hex
+
+# Tamano del programa
+recipe.size.pattern="{compiler.path}{compiler.size.cmd}" -A "{build.path}/{build.project_name}.elf"
+recipe.size.regex=^(?:\.text|\.data|\.ARM\.exidx)\s+([0-9]+).*
+recipe.size.regex.data=^(?:\.data|\.bss|\.noinit)\s+([0-9]+).*
+
+# -----------------------------------------------------------------------------
+#  Carga con SEGGER J-Link (SWD)
+#  Los scripts buscan JLink.exe en C:\Program Files\SEGGER\JLink* o usan la
+#  variable de entorno JLINK_PATH (carpeta donde esta JLink.exe / JLinkExe).
+# -----------------------------------------------------------------------------
+tools.jlink.path={runtime.platform.path}/tools/jlink
+tools.jlink.upload.params.verbose=
+tools.jlink.upload.params.quiet=
+tools.jlink.upload.pattern="{path}/jlink_upload.sh" "{path}" "{build.path}/{build.project_name}.hex" "{upload.jlink_device}" "{upload.jlink_speed}"
+tools.jlink.upload.pattern.windows="{path}/jlink_upload.bat" "{path}" "{build.path}/{build.project_name}.hex" "{upload.jlink_device}" "{upload.jlink_speed}"
+
+# -----------------------------------------------------------------------------
+#  Depuracion en Arduino IDE 2.x (cortex-debug + J-Link GDB Server)
+#  Si JLinkGDBServerCL no esta en la ruta por defecto, indique la suya en
+#  platform.local.txt:  debug.server.jlink.path=C:/Program Files/SEGGER/JLink_V812/JLinkGDBServerCL.exe
+# -----------------------------------------------------------------------------
+debug.executable={build.path}/{build.project_name}.elf
+debug.toolchain=gcc
+debug.toolchain.path={compiler.path}
+debug.toolchain.prefix=arm-none-eabi
+debug.server=jlink
+debug.server.jlink.path=C:/Program Files/SEGGER/JLink/JLinkGDBServerCL.exe
+debug.server.jlink.path.linux=/opt/SEGGER/JLink/JLinkGDBServerCLExe
+debug.server.jlink.path.macosx=/Applications/SEGGER/JLink/JLinkGDBServerCLExe
+debug.svd_file={runtime.platform.path}/svd/CH579SFR.svd
+debug.cortex-debug.custom.servertype=jlink
+debug.cortex-debug.custom.serverpath={debug.server.jlink.path}
+debug.cortex-debug.custom.device={debug.jlink_device}
+debug.cortex-debug.custom.interface=swd
+debug.cortex-debug.custom.runToEntryPoint=setup

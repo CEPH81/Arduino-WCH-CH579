@@ -1,0 +1,4 @@
+# Configuracion local de cada PC (ruta del compilador, J-Link, etc.)
+platform.local.txt
+boards.local.txt
+*.emu.bin

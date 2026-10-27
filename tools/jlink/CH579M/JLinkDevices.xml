@@ -1,0 +1,16 @@
+<!--
+  Definicion del WCH CH579M para SEGGER J-Link (Open Flashloader).
+  El script de carga copia esta carpeta a:
+    Windows: %APPDATA%\SEGGER\JLinkDevices\WCH\CH579M\
+    Linux:   ~/.config/SEGGER/JLinkDevices/WCH/CH579M/
+    macOS:   ~/Library/Application Support/SEGGER/JLinkDevices/WCH/CH579M/
+  La ruta del Loader es relativa a este archivo.
+-->
+<Database>
+  <Device>
+    <ChipInfo Vendor="WCH" Name="CH579M" Core="JLINK_CORE_CORTEX_M0"
+              WorkRAMAddr="0x20000000" WorkRAMSize="0x8000" />
+    <FlashBankInfo Name="Internal Flash" BaseAddr="0x00000000" MaxSize="0x0003E800"
+                   Loader="CH57x.FLM" LoaderType="FLASH_ALGO_TYPE_OPEN" AlwaysPresent="1" />
+  </Device>
+</Database>
