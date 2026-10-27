@@ -36,8 +36,10 @@ void UARTClass::begin(unsigned long baud, uint16_t config)
     *(volatile uint16_t *)&REG(UART_DLL) = (uint16_t)x;
     REG(UART_DIV) = 1;
 
-    /* FIFO habilitada, disparo a 4 bytes, ambas FIFO limpias */
-    REG(UART_FCR) = (2 << 6) | RB_FCR_TX_FIFO_CLR | RB_FCR_RX_FIFO_CLR | RB_FCR_FIFO_EN;
+    /* FIFO habilitada con disparo a 1 byte: cada caracter recibido genera
+     * la interrupcion al instante (con 4 bytes, los caracteres sueltos
+     * esperaban al timeout de la FIFO). Ambas FIFO limpias. */
+    REG(UART_FCR) = (0 << 6) | RB_FCR_TX_FIFO_CLR | RB_FCR_RX_FIFO_CLR | RB_FCR_FIFO_EN;
 
     /* Formato de trama */
     uint8_t lcr;
