@@ -6,9 +6,15 @@
 static volatile uint32_t s_millis = 0;
 static uint32_t s_ticks_per_us = F_CPU / 1000000UL;
 
+/* Gancho opcional llamado cada 1 ms desde la interrupcion del SysTick.
+ * Lo usan librerias que necesitan una base de tiempo (p. ej. Ethernet,
+ * para el temporizador de la pila TCP/IP) sin ocupar un TMRx. */
+extern void ch579_systick_hook(void) __attribute__((weak));
+
 void SysTick_Handler(void)
 {
     s_millis++;
+    if (ch579_systick_hook) ch579_systick_hook();
 }
 
 uint32_t ch579_get_sysclk(void)
