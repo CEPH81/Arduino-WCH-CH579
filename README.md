@@ -108,13 +108,13 @@ En el sketch se puede escribir el nombre directamente: `digitalWrite(PB0, HIGH)`
 | **LCD_HD44780** (LCD 16x2 por I²C PCF8574 o 74HC164), **OLED_SSD1306**, **HCSR04_CH579**, **NTC_Thermistor**, **CH579_Log** | ✅ portadas de los proyectos Keil |
 | Funciones del SDK de WCH (`GPIOA_ModeCfg`, `TMR0_TimerInit`, `GetSysClock`...) | ✅ disponibles en el sketch |
 | `SerialUSB`: puerto COM virtual (CDC) por el USB nativo (PB10/PB11), sin drivers | ✅ |
-| **Ethernet** (10 Mbit/s integrado): `Ethernet`, `EthernetClient`, `EthernetServer`, `EthernetUDP`, DHCP y DNS | ✅ librería **Ethernet_CH579** |
+| **Ethernet** (10 Mbit/s integrado): `Ethernet`, `EthernetClient`, `EthernetServer`, `EthernetUDP`, DHCP y DNS | ✅ librería **Ethernet** propia del CH579 |
 | BLE | ⏳ siguiente fase |
 
 \* Emulado: el CH579 no tiene salida de drenador abierto.
 \*\* Emulado invirtiendo el flanco en cada interrupción.
 
-### Ethernet (librería Ethernet_CH579)
+### Ethernet (librería `Ethernet` del CH579)
 
 Usa el PHY y MAC de 10 Mbit/s del CH579 con la pila TCP/IP de WCH (`CH57xNET.LIB`,
 ya incluida como `libCH57xNET.a`). La API es la de la librería `Ethernet` de Arduino,
@@ -127,7 +127,7 @@ Ethernet.begin();                                  // DHCP con la MAC de fábric
 Ethernet.begin(IPAddress(192, 168, 1, 200));       // o IP fija
 ```
 
-| Ejemplo (Archivo → Ejemplos → Ethernet_CH579) | Qué hace |
+| Ejemplo (Archivo → Ejemplos → Ethernet, en la sección de la placa WCH CH579M) | Qué hace |
 |---|---|
 | EthernetInfo | Estado del enlace, IP, puerta de enlace, DNS y MAC |
 | TcpCliente | Cliente TCP que se conecta a un servidor del PC (192.168.1.100:5000) |
@@ -137,6 +137,9 @@ Ethernet.begin(IPAddress(192, 168, 1, 200));       // o IP fija
 | UdpEco | Recibe UDP en el puerto 2000 y responde en mayúsculas |
 | UdpHoraNTP | Hora de `pool.ntp.org` por NTP |
 | MQTT_PubSub | Publica A0 y el tiempo encendido, y controla el LED por MQTT (requiere **PubSubClient**) |
+
+Se llama `Ethernet` a propósito: con la placa CH579M elegida, el IDE la usa en lugar de la
+librería `Ethernet` genérica de Arduino (W5100/W5500), aunque esa también esté instalada.
 
 Límites: 6 sockets en total (por ejemplo 1 servidor + 4 conexiones TCP + UDP);
 la librería ocupa ~24 KB de RAM, quedan ~7–8 KB para el sketch. Los LEDs del RJ45
@@ -176,7 +179,7 @@ debug.server.jlink.path=C:/Program Files/SEGGER/JLink_V812/JLinkGDBServerCL.exe
 boards.txt / platform.txt     definición de la placa y del proceso de compilación
 cores/arduino/                core Arduino + ArduinoCore-API (api/) + SDK de WCH (sdk/)
 variants/ch579m_v16/          mapa de pines y linker script (ch579.ld)
-libraries/                    SPI, Wire, EEPROM, Ethernet_CH579, LCD_HD44780, OLED_SSD1306,
+libraries/                    SPI, Wire, EEPROM, Ethernet (CH579), LCD_HD44780, OLED_SSD1306,
                               HCSR04_CH579, NTC_Thermistor, CH579_Log y los ejemplos de la placa (CH579M)
 tools/jlink/                  scripts de carga + JLinkDevices.xml + CH57x.FLM
 svd/CH579SFR.svd              registros para el depurador
@@ -185,7 +188,7 @@ svd/CH579SFR.svd              registros para el depurador
 ## Licencias
 
 - `cores/arduino/api/`: ArduinoCore-API, LGPL 2.1.
-- `cores/arduino/sdk/`, `libraries/Ethernet_CH579/src/cortex-m0/libCH57xNET.a`, `CH57xNET.h`, `tools/jlink/CH579M/CH57x.FLM`, `svd/`: material de WCH. Su licencia
+- `cores/arduino/sdk/`, `libraries/Ethernet/src/cortex-m0/libCH57xNET.a`, `CH57xNET.h`, `tools/jlink/CH579M/CH57x.FLM`, `svd/`: material de WCH. Su licencia
   no está especificada; el repositorio es privado mientras se aclara la redistribución.
 - El resto (core, variante, librerías y scripts): escrito para este proyecto. Las librerías
   de pantallas y sensores están portadas de la HAL `Hal_CH57xx_*` de Carlos Pacheco (CEPH81).
