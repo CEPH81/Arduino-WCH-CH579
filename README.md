@@ -104,6 +104,7 @@ En el sketch se puede escribir el nombre directamente: `digitalWrite(PB0, HIGH)`
 | `attachInterrupt` (LOW, HIGH, RISING, FALLING, CHANGE\*\*) | ✅ |
 | `tone` / `noTone` (TMR3), `pulseIn`, `shiftOut` / `shiftIn`, `random` | ✅ |
 | Librerías **SPI**, **Wire**, **EEPROM** (2 KB de DataFlash) | ✅ |
+| **LCD_HD44780** (LCD 16x2 por I²C PCF8574 o 74HC164), **OLED_SSD1306**, **HCSR04_CH579**, **NTC_Thermistor**, **CH579_Log** | ✅ portadas de los proyectos Keil |
 | Funciones del SDK de WCH (`GPIOA_ModeCfg`, `TMR0_TimerInit`, `GetSysClock`...) | ✅ disponibles en el sketch |
 | USB (CDC), BLE, Ethernet | ⏳ siguiente fase |
 
@@ -144,7 +145,8 @@ debug.server.jlink.path=C:/Program Files/SEGGER/JLink_V812/JLinkGDBServerCL.exe
 boards.txt / platform.txt     definición de la placa y del proceso de compilación
 cores/arduino/                core Arduino + ArduinoCore-API (api/) + SDK de WCH (sdk/)
 variants/ch579m_v16/          mapa de pines y linker script (ch579.ld)
-libraries/                    SPI, Wire, EEPROM y ejemplos (CH579M)
+libraries/                    SPI, Wire, EEPROM, LCD_HD44780, OLED_SSD1306, HCSR04_CH579,
+                              NTC_Thermistor, CH579_Log y los ejemplos de la placa (CH579M)
 tools/jlink/                  scripts de carga + JLinkDevices.xml + CH57x.FLM
 svd/CH579SFR.svd              registros para el depurador
 ```
@@ -154,4 +156,5 @@ svd/CH579SFR.svd              registros para el depurador
 - `cores/arduino/api/`: ArduinoCore-API, LGPL 2.1.
 - `cores/arduino/sdk/`, `tools/jlink/CH579M/CH57x.FLM`, `svd/`: material de WCH. Su licencia
   no está especificada; el repositorio es privado mientras se aclara la redistribución.
-- El resto (core, variante, librerías y scripts): escrito para este proyecto.
+- El resto (core, variante, librerías y scripts): escrito para este proyecto. Las librerías
+  de pantallas y sensores están portadas de la HAL `Hal_CH57xx_*` de Carlos Pacheco (CEPH81).
