@@ -76,6 +76,7 @@ En el sketch se puede escribir el nombre directamente: `digitalWrite(PB0, HIGH)`
 | `Serial0` (UART0) | TX = PB7, RX = PB4 |
 | `Serial2` (UART2) | TX = PA7, RX = PA6 |
 | `Serial3` (UART3) | TX = PA5, RX = PA4 |
+| `SerialUSB` (USB nativo, 2.º micro-USB) | D- = PB10, D+ = PB11 |
 | `SPI` (SPI0) | SS = PA12, SCK = PA13, MOSI = PA14, MISO = PA15 |
 | `SPI1` | SCK = PA0, MOSI = PA1, MISO = PA2 |
 | `Wire` (I²C por software) | SDA = PB21, SCL = PB20 (cambiables con `Wire.setPins`) |
@@ -106,7 +107,8 @@ En el sketch se puede escribir el nombre directamente: `digitalWrite(PB0, HIGH)`
 | Librerías **SPI**, **Wire**, **EEPROM** (2 KB de DataFlash) | ✅ |
 | **LCD_HD44780** (LCD 16x2 por I²C PCF8574 o 74HC164), **OLED_SSD1306**, **HCSR04_CH579**, **NTC_Thermistor**, **CH579_Log** | ✅ portadas de los proyectos Keil |
 | Funciones del SDK de WCH (`GPIOA_ModeCfg`, `TMR0_TimerInit`, `GetSysClock`...) | ✅ disponibles en el sketch |
-| USB (CDC), BLE, Ethernet | ⏳ siguiente fase |
+| `SerialUSB`: puerto COM virtual (CDC) por el USB nativo (PB10/PB11), sin drivers | ✅ |
+| BLE, Ethernet | ⏳ siguiente fase |
 
 \* Emulado: el CH579 no tiene salida de drenador abierto.
 \*\* Emulado invirtiendo el flanco en cada interrupción.

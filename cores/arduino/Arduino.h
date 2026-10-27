@@ -81,8 +81,9 @@ uint32_t ch579_get_sysclk(void);
 #ifdef __cplusplus
 } /* extern "C" */
 
-/* Puertos serie */
+/* Puertos serie: UART0..3 y USB nativo (SerialUSB) */
 #include "HardwareSerial.h"
+#include "USBCDC.h"
 #endif
 
 #endif /* Arduino_h */
