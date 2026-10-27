@@ -53,8 +53,11 @@ void conectarMqtt() {
 
 void setup() {
   Serial.begin(115200);
+  delay(100);
+  Serial.println("\r\n=== CH579M Ethernet: MQTT_PubSub ===");
+  Ethernet.setDebug(Serial);        // muestra cada paso: enlace, DHCP...
   pinMode(LED_BUILTIN, OUTPUT);
-  if (!Ethernet.begin()) {
+  if (!Ethernet.begin(nullptr, 20000)) {
     Serial.println("DHCP fallo");
     while (true) delay(1000);
   }

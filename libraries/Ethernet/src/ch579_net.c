@@ -235,6 +235,14 @@ int net_init(const uint8_t mac[6], const uint8_t ip[4], const uint8_t gw[4], con
 
     if (mac) memcpy(MACAddr, mac, 6);
     else     GetMACAddress(MACAddr);      /* MAC unica grabada de fabrica */
+    {   /* MAC vacia o invalida (todo 0/FF o multicast): una local administrada */
+        uint8_t o = 0, a = 0xFF;
+        for (int i = 0; i < 6; i++) { o |= MACAddr[i]; a &= MACAddr[i]; }
+        if (o == 0 || a == 0xFF || (MACAddr[0] & 0x01)) {
+            static const uint8_t def[6] = { 0x02, 0x57, 0x43, 0x48, 0x05, 0x79 };
+            memcpy(MACAddr, def, 6);
+        }
+    }
 
     for (int i = 0; i < NET_MAX_SOCKETS; i++) sock_reset(i);
 
@@ -270,6 +278,12 @@ void net_get_config(uint8_t ip[4], uint8_t gw[4], uint8_t mask[4])
 }
 
 void net_get_mac(uint8_t mac[6]) { memcpy(mac, MACAddr, 6); }
+
+uint16_t net_phy_read(uint8_t reg)
+{
+    R8_ETH_MIREGADR = reg & RB_ETH_MIREGADR_MASK;
+    return R16_ETH_MIRD;
+}
 
 /* ------------------------------------------------- DHCP */
 static UINT8 dhcp_cb(UINT8 status, void *arg)

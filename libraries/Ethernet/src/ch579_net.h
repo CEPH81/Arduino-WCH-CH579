@@ -34,6 +34,7 @@ bool     net_link_up(void);
 uint8_t  net_phy_status(void);
 void     net_get_config(uint8_t ip[4], uint8_t gw[4], uint8_t mask[4]);
 void     net_get_mac(uint8_t mac[6]);
+uint16_t net_phy_read(uint8_t reg);      /* registro MII del PHY (diagnostico) */
 
 /* --- DHCP --- */
 int      net_dhcp_start(void);

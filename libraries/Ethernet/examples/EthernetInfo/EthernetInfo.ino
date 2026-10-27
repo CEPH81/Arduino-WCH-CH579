@@ -1,8 +1,9 @@
 /*
- * EthernetInfo - Obtiene IP por DHCP y muestra la configuracion de red.
+ * EthernetInfo - Diagnostico de la red: enlace, DHCP y configuracion.
  *
- * Conecte el RJ45 de la placa a su router/switch. Resultado por Serial
- * (115200). Despues puede hacer "ping" a la IP mostrada desde el PC.
+ * Conecte el RJ45 de la placa a su router/switch y abra el Monitor Serie
+ * (puerto del CH340, 115200). Muestra cada paso; si algo falla dice donde.
+ * Con IP asignada, haga "ping" a esa IP desde el PC.
  */
 #include <Ethernet.h>
 
@@ -17,17 +18,30 @@ void printMAC() {
   Serial.println();
 }
 
+void printPHY() {
+  uint16_t bmsr = Ethernet.phyRegister(1);
+  Serial.print("PHY: estado pila=");
+  Serial.print(Ethernet.phyStatus());
+  Serial.print("  BMCR=0x");
+  Serial.print(Ethernet.phyRegister(0), HEX);
+  Serial.print("  BMSR=0x");
+  Serial.print(bmsr, HEX);
+  Serial.println((bmsr & 0x0004) ? "  (enlace SI)" : "  (enlace NO)");
+}
+
 void setup() {
   Serial.begin(115200);
   delay(100);
-  Serial.println("\r\nCH579M Ethernet - DHCP");
+  Serial.println("\r\n=== CH579M Ethernet: EthernetInfo ===");
+  Ethernet.setDebug(Serial);        // muestra cada paso: enlace, DHCP...
 
-  if (!Ethernet.begin()) {            // DHCP con la MAC unica del chip
-    Serial.print("DHCP fallo. Enlace: ");
-    Serial.println(Ethernet.linkStatus() == LinkON ? "SI" : "NO (revise el cable)");
-    while (true) delay(1000);
-  }
+  bool dhcp = Ethernet.begin(nullptr, 20000);   // DHCP con la MAC unica del chip
   Serial.print("MAC:       "); printMAC();
+  printPHY();
+  if (!dhcp) {
+    Serial.println("Sin DHCP: se usa IP fija 192.168.1.200");
+    Ethernet.begin(IPAddress(192, 168, 1, 200));
+  }
   Serial.print("IP:        "); Serial.println(Ethernet.localIP());
   Serial.print("Mascara:   "); Serial.println(Ethernet.subnetMask());
   Serial.print("Gateway:   "); Serial.println(Ethernet.gatewayIP());
@@ -40,6 +54,7 @@ void loop() {
   EthernetLinkStatus ahora = Ethernet.linkStatus();
   if (ahora != antes) {
     Serial.println(ahora == LinkON ? "Cable conectado" : "Cable desconectado");
+    printPHY();
     antes = ahora;
   }
   delay(100);

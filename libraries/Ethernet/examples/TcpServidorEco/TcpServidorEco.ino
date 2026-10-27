@@ -11,14 +11,28 @@ EthernetServer servidor(2000);
 
 void setup() {
   Serial.begin(115200);
-  if (!Ethernet.begin()) Ethernet.begin(IPAddress(192, 168, 1, 200));
+  delay(100);
+  Serial.println("\r\n=== CH579M Ethernet: TcpServidorEco ===");
+  Ethernet.setDebug(Serial);        // muestra cada paso: enlace, DHCP...
+  if (!Ethernet.begin(nullptr, 20000)) Ethernet.begin(IPAddress(192, 168, 1, 200));
   servidor.begin();
   Serial.print("Servidor de eco en ");
   Serial.print(Ethernet.localIP());
   Serial.println(":2000");
 }
 
+/* Repite la direccion cada 10 s (por si abrio el Monitor Serie tarde) */
+void recordarIP() {
+  static unsigned long t = 0;
+  if (millis() - t < 10000) return;
+  t = millis();
+  Serial.print("Servidor de eco en ");
+  Serial.print(Ethernet.localIP());
+  Serial.println(":2000");
+}
+
 void loop() {
+  recordarIP();
   /* Avisa de cada conexion nueva */
   EthernetClient nuevo = servidor.accept();
   if (nuevo) {

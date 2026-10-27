@@ -32,7 +32,10 @@ bool pedirHora(uint32_t &unixUtc) {
 
 void setup() {
   Serial.begin(115200);
-  if (!Ethernet.begin()) {
+  delay(100);
+  Serial.println("\r\n=== CH579M Ethernet: UdpHoraNTP ===");
+  Ethernet.setDebug(Serial);        // muestra cada paso: enlace, DHCP...
+  if (!Ethernet.begin(nullptr, 20000)) {
     Serial.println("DHCP fallo: NTP necesita salida a Internet");
     while (true) delay(1000);
   }

@@ -60,9 +60,18 @@ public:
     /* Resuelve un nombre con el servidor DNS. Devuelve 1 si lo encontro. */
     int hostByName(const char *host, IPAddress &result, unsigned long timeout = 3000);
 
+    /* Mensajes de diagnostico de begin() (enlace, DHCP...): Ethernet.setDebug(Serial) */
+    void setDebug(Print &p) { _dbg = &p; }
+    /* Estado del PHY segun la pila: 1 = sin cable, 2 = 10M full, 4 = 10M half */
+    uint8_t phyStatus(void);
+    /* Registro MII del PHY (0 = BMCR, 1 = BMSR: bit 2 = enlace) */
+    uint16_t phyRegister(uint8_t reg);
+
 private:
     bool init(uint8_t *mac, const uint8_t ip[4], const uint8_t gw[4], const uint8_t mask[4]);
     IPAddress _dns;
+    Print *_dbg = nullptr;
+    void dbg(const char *s) { if (_dbg) _dbg->print(s); }
 };
 
 extern EthernetClass Ethernet;

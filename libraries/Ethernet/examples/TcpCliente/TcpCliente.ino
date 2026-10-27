@@ -30,7 +30,10 @@ void conectar() {
 
 void setup() {
   Serial.begin(115200);
-  if (!Ethernet.begin()) {                      // DHCP
+  delay(100);
+  Serial.println("\r\n=== CH579M Ethernet: TcpCliente ===");
+  Ethernet.setDebug(Serial);        // muestra cada paso: enlace, DHCP...
+  if (!Ethernet.begin(nullptr, 20000)) {                      // DHCP
     Serial.println("Sin DHCP: usando IP fija 192.168.1.200");
     Ethernet.begin(IPAddress(192, 168, 1, 200));
   }

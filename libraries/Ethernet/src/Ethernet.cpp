@@ -25,22 +25,36 @@ bool EthernetClass::waitForLink(unsigned long timeout)
 int EthernetClass::begin(uint8_t *mac, unsigned long timeout, unsigned long responseTimeout)
 {
     (void)responseTimeout;
-    if (!init(mac, nullptr, nullptr, nullptr)) return 0;
+    dbg("[ETH] Iniciando pila TCP/IP... ");
+    if (!init(mac, nullptr, nullptr, nullptr)) { dbg("ERROR\r\n"); return 0; }
+    dbg("OK\r\n[ETH] Esperando enlace (cable)");
 
-    unsigned long t0 = millis();
-    if (!waitForLink(timeout)) return 0;
-    if (net_dhcp_start() != 0) return 0;
+    unsigned long t0 = millis(), tp = t0;
+    while (!net_link_up()) {
+        net_poll();
+        if (millis() - tp >= 1000) { tp = millis(); dbg("."); }
+        if (millis() - t0 >= timeout) { dbg(" sin enlace: revise el cable y el router\r\n"); return 0; }
+    }
+    if (_dbg) { _dbg->print(" OK (PHY="); _dbg->print(net_phy_status()); _dbg->print(")\r\n"); }
+
+    dbg("[ETH] Pidiendo IP por DHCP");
+    if (net_dhcp_start() != 0) { dbg(" ERROR al iniciar DHCP\r\n"); return 0; }
     while (net_dhcp_state() == 0) {
         net_poll();
-        if (millis() - t0 >= timeout) return 0;
+        if (millis() - tp >= 1000) { tp = millis(); dbg("."); }
+        if (millis() - t0 >= timeout) { dbg(" sin respuesta del servidor DHCP\r\n"); return 0; }
     }
-    if (net_dhcp_state() != 1) return 0;
+    if (net_dhcp_state() != 1) { dbg(" fallo\r\n"); return 0; }
+    dbg(" OK\r\n");
 
     const uint8_t *d = net_dhcp_dns();
     _dns = IPAddress(d[0], d[1], d[2], d[3]);
     if (_dns == IPAddress(0, 0, 0, 0)) _dns = gatewayIP();
     return 1;
 }
+
+uint8_t  EthernetClass::phyStatus(void)            { return net_phy_status(); }
+uint16_t EthernetClass::phyRegister(uint8_t reg)   { return net_phy_read(reg); }
 
 void EthernetClass::begin(uint8_t *mac, IPAddress ip)
 {
@@ -64,8 +78,9 @@ void EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress g
     uint8_t i[4], g[4], m[4];
     ip_to_bytes(ip, i); ip_to_bytes(gateway, g); ip_to_bytes(subnet, m);
     _dns = dns;
-    init(mac, i, g, m);
-    waitForLink(3000);    /* no es obligatorio: la pila funciona en cuanto haya enlace */
+    dbg("[ETH] IP fija: iniciando pila TCP/IP... ");
+    dbg(init(mac, i, g, m) ? "OK\r\n" : "ERROR\r\n");
+    dbg(waitForLink(3000) ? "[ETH] Enlace OK\r\n" : "[ETH] Aun sin enlace (revise el cable)\r\n");    /* no es obligatorio: la pila funciona en cuanto haya enlace */
 }
 
 int EthernetClass::maintain(void)

@@ -14,7 +14,10 @@ EthernetClient cliente;
 
 void setup() {
   Serial.begin(115200);
-  if (!Ethernet.begin()) {
+  delay(100);
+  Serial.println("\r\n=== CH579M Ethernet: ClienteWeb ===");
+  Ethernet.setDebug(Serial);        // muestra cada paso: enlace, DHCP...
+  if (!Ethernet.begin(nullptr, 20000)) {
     Serial.println("DHCP fallo: este ejemplo necesita salida a Internet");
     while (true) delay(1000);
   }

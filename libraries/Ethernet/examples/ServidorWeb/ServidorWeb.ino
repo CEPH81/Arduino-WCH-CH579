@@ -31,14 +31,28 @@ void enviarPagina(EthernetClient &c) {
 
 void setup() {
   Serial.begin(115200);
+  delay(100);
+  Serial.println("\r\n=== CH579M Ethernet: ServidorWeb ===");
+  Ethernet.setDebug(Serial);        // muestra cada paso: enlace, DHCP...
   pinMode(LED_BUILTIN, OUTPUT);
-  if (!Ethernet.begin()) Ethernet.begin(IPAddress(192, 168, 1, 200));
+  if (!Ethernet.begin(nullptr, 20000)) Ethernet.begin(IPAddress(192, 168, 1, 200));
   servidor.begin();
   Serial.print("Abra http://");
   Serial.println(Ethernet.localIP());
 }
 
+/* Repite la direccion cada 10 s (por si abrio el Monitor Serie tarde) */
+void recordarIP() {
+  static unsigned long t = 0;
+  if (millis() - t < 10000) return;
+  t = millis();
+  Serial.print("Servidor web en http://");
+  Serial.print(Ethernet.localIP());
+  Serial.println("");
+}
+
 void loop() {
+  recordarIP();
   EthernetClient c = servidor.available();
   if (!c) return;
 

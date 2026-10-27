@@ -141,6 +141,11 @@ Ethernet.begin(IPAddress(192, 168, 1, 200));       // o IP fija
 Se llama `Ethernet` a propósito: con la placa CH579M elegida, el IDE la usa en lugar de la
 librería `Ethernet` genérica de Arduino (W5100/W5500), aunque esa también esté instalada.
 
+Para ver qué pasa al arrancar, los ejemplos llaman a `Ethernet.setDebug(Serial)`: se imprime
+cada paso (`[ETH] Esperando enlace...`, `[ETH] Pidiendo IP por DHCP...`). Si no aparece nada,
+abra el Monitor Serie y pulse **RESET** en la placa. **EthernetInfo** sirve de diagnóstico:
+muestra el estado del PHY (registros BMCR/BMSR) aunque no haya IP.
+
 Límites: 6 sockets en total (por ejemplo 1 servidor + 4 conexiones TCP + UDP);
 la librería ocupa ~24 KB de RAM, quedan ~7–8 KB para el sketch. Los LEDs del RJ45
 los controla el sketch (ver ejemplo `08_LedsRJ45`); no los usa la pila.
