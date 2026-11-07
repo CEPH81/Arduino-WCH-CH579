@@ -7,35 +7,31 @@ Paquete de placas para **Arduino IDE 2.x** con soporte del microcontrolador **WC
 - **Depuración** desde el IDE 2.x (puntos de interrupción, variables y registros de periféricos con el SVD).
 - API de Arduino estándar (basada en ArduinoCore-API) + acceso directo al SDK de WCH desde el sketch.
 
-> Versión 0.1.0, **en pruebas**: compila con GCC 7 y GCC 13 y se probó en un emulador
+> Versión 0.2.0, **en pruebas**: compila con GCC 7 y GCC 13 y se probó en un emulador
 > de Cortex-M0, pero **aún no se ha probado en la placa real**.
 
 ---
 
-## Instalación (repositorio privado, instalación manual)
+## Instalación (Gestor de placas)
 
 1. **Arduino IDE 2.x** instalado.
-2. **Compilador ARM**: en *Herramientas → Placa → Gestor de placas*, instale
-   **"Arduino SAMD Boards (32-bits ARM Cortex-M0+)"**. Solo se usa para obtener
-   `arm-none-eabi-gcc`; no hace falta usar esas placas.
-3. **Este paquete**: copie o clone el repositorio exactamente en esta ruta
-   (los nombres `wch` y `ch57x` son obligatorios):
+2. *Archivo → Preferencias → URLs adicionales de gestor de placas*, agregue:
 
    ```
-   Windows:  Documentos\Arduino\hardware\wch\ch57x\
-   Linux:    ~/Arduino/hardware/wch/ch57x/
+   https://raw.githubusercontent.com/CEPH81/Arduino-WCH-CH579/main/package_ch579duino_index.json
    ```
+3. *Herramientas → Placa → Gestor de placas*, busque **CH579** e instale
+   **"WCH CH57x (ARM Cortex-M0) by MikrocontrollerCephs"**. El compilador ARM se
+   instala solo (ya no hace falta instalar "Arduino SAMD Boards").
+   Las versiones nuevas aparecen ahí mismo con el botón **Actualizar**.
 
-   Dentro de `ch57x` deben quedar `boards.txt`, `platform.txt`, `cores`, `variants`...
+> Si antes lo instaló a mano en `Documentos\Arduino\hardware\wch\ch57x\`, borre esa
+> carpeta: si no, el IDE sigue usando la copia manual ("in Sketchbook").
 
-   ```
-   cd Documentos\Arduino\hardware\wch
-   git clone https://github.com/<usuario>/arduino-wch-ch579.git ch57x
-   ```
 4. **J-Link**: instale *J-Link Software and Documentation Pack* de SEGGER.
    El script de carga registra solo la definición del CH579M (`JLinkDevices.xml`
    + `CH57x.FLM`) en `%APPDATA%\SEGGER\JLinkDevices\WCH\CH579M\`.
-5. Reinicie el IDE y elija **Herramientas → Placa → WCH CH57x → WCH CH579M (placa de desarrollo V1.6)**.
+5. Elija **Herramientas → Placa → WCH CH57x (ARM Cortex-M0) by MikrocontrollerCephs → WCH CH579M (placa de desarrollo V1.6)**.
 
 ### Conexión del J-Link (conector P3 de la placa)
 
@@ -236,6 +232,6 @@ svd/CH579SFR.svd              registros para el depurador
 
 - `cores/arduino/api/`: ArduinoCore-API, LGPL 2.1.
 - `cores/arduino/sdk/`, `libraries/Ethernet/src/cortex-m0/libCH57xNET.a`, `CH57xNET.h`, `libraries/BLE_CH579/src/cortex-m0/libCH57xBLE.a`, `CH57xBLE_LIB.h`, `tools/jlink/CH579M/CH57x.FLM`, `svd/`: material de WCH. Su licencia
-  no está especificada; el repositorio es privado mientras se aclara la redistribución.
+  no está especificada; se incluyen tal como los distribuye WCH en sus SDK y ejemplos.
 - El resto (core, variante, librerías y scripts): escrito para este proyecto. Las librerías
   de pantallas y sensores están portadas de la HAL `Hal_CH57xx_*` de Carlos Pacheco (CEPH81).

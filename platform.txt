@@ -3,8 +3,8 @@
 #  Especificacion: https://arduino.github.io/arduino-cli/latest/platform-specification/
 # =============================================================================
 
-name=WCH CH57x (ARM Cortex-M0)
-version=0.1.0
+name=WCH CH57x (ARM Cortex-M0) by MikrocontrollerCephs
+version=0.2.0
 
 # -----------------------------------------------------------------------------
 #  Compilador: arm-none-eabi-gcc
