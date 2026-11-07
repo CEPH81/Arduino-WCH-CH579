@@ -1,0 +1,41 @@
+{
+  "packages": [
+    {
+      "name": "ch579duino",
+      "maintainer": "MikrocontrollerCephs (CEPH81)",
+      "websiteURL": "https://github.com/CEPH81/Arduino-WCH-CH579",
+      "email": "",
+      "help": {
+        "online": "https://github.com/CEPH81/Arduino-WCH-CH579"
+      },
+      "platforms": [
+        {
+          "name": "WCH CH57x (ARM Cortex-M0) by MikrocontrollerCephs",
+          "architecture": "ch57x",
+          "version": "0.2.0",
+          "category": "Contributed",
+          "url": "https://raw.githubusercontent.com/CEPH81/Arduino-WCH-CH579/paquetes/ch579duino-0.2.0.tar.bz2",
+          "archiveFileName": "ch579duino-0.2.0.tar.bz2",
+          "checksum": "SHA-256:88821f243abdf414a55595adabd4a5f3a3d98cc206b6bd2845c8bfb1ccf0490d",
+          "size": "681168",
+          "help": {
+            "online": "https://github.com/CEPH81/Arduino-WCH-CH579"
+          },
+          "boards": [
+            {
+              "name": "WCH CH579M (placa de desarrollo V1.6)"
+            }
+          ],
+          "toolsDependencies": [
+            {
+              "packager": "arduino",
+              "name": "arm-none-eabi-gcc",
+              "version": "7-2017q4"
+            }
+          ]
+        }
+      ],
+      "tools": []
+    }
+  ]
+}
