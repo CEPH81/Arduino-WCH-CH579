@@ -29,9 +29,10 @@ SECTIONS
   {
     KEEP(*(.isr_vector))
     *(.text .text.* .gnu.linkonce.t.*)
+    *(i.*)                       /* codigo de las librerias de WCH (Keil/armcc) */
     *(.glue_7) *(.glue_7t)
     *(.rodata .rodata* .gnu.linkonce.r.*)
-    *(.constdata*)
+    *(.constdata* .conststring*)
 
     KEEP(*(.init))
     KEEP(*(.fini))

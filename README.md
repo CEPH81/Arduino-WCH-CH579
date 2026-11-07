@@ -109,7 +109,7 @@ En el sketch se puede escribir el nombre directamente: `digitalWrite(PB0, HIGH)`
 | Funciones del SDK de WCH (`GPIOA_ModeCfg`, `TMR0_TimerInit`, `GetSysClock`...) | ✅ disponibles en el sketch |
 | `SerialUSB`: puerto COM virtual (CDC) por el USB nativo (PB10/PB11), sin drivers | ✅ |
 | **Ethernet** (10 Mbit/s integrado): `Ethernet`, `EthernetClient`, `EthernetServer`, `EthernetUDP`, DHCP y DNS | ✅ librería **Ethernet** propia del CH579 |
-| BLE | ⏳ siguiente fase |
+| **Bluetooth LE 4.2** (radio integrada): difusor, observador, periférico (UART BLE con el móvil) y central | ✅ librería **BLE_CH579** |
 
 \* Emulado: el CH579 no tiene salida de drenador abierto.
 \*\* Emulado invirtiendo el flanco en cada interrupción.
@@ -125,7 +125,13 @@ para MQTT).
 #include <Ethernet.h>
 Ethernet.begin();                                  // DHCP con la MAC de fábrica del chip
 Ethernet.begin(IPAddress(192, 168, 1, 200));       // o IP fija
+Ethernet.beginAuto();      // DHCP y, si nadie responde (cable directo al PC), 169.254.x.y
 ```
+
+**Sin router:** conecte el cable directo al puerto LAN del PC. Con `beginAuto()` la placa
+toma sola una IP 169.254.x.y, como hace Windows: abra en el navegador la IP que muestra el
+monitor serie. Para darle Internet, active en Windows el *Uso compartido* del adaptador WiFi
+hacia el Ethernet (la placa recibe 192.168.137.x). Vea el ejemplo **ConexionDirectaPC**.
 
 | Ejemplo (Archivo → Ejemplos → Ethernet, en la sección de la placa WCH CH579M) | Qué hace |
 |---|---|
@@ -135,6 +141,7 @@ Ethernet.begin(IPAddress(192, 168, 1, 200));       // o IP fija
 | ServidorWeb | Página web en el puerto 80: lectura de A0 y botones para el LED |
 | ClienteWeb | Petición HTTP a `example.com` (DNS + TCP) |
 | UdpEco | Recibe UDP en el puerto 2000 y responde en mayúsculas |
+| ConexionDirectaPC | Cable directo al puerto LAN del PC, sin router (IP 169.254.x.x automática, ICS de Windows o IP fija) |
 | UdpHoraNTP | Hora de `pool.ntp.org` por NTP |
 | MQTT_PubSub | Publica A0 y el tiempo encendido, y controla el LED por MQTT (requiere **PubSubClient**) |
 
@@ -149,6 +156,41 @@ muestra el estado del PHY (registros BMCR/BMSR) aunque no haya IP.
 Límites: 6 sockets en total (por ejemplo 1 servidor + 4 conexiones TCP + UDP);
 la librería ocupa ~24 KB de RAM, quedan ~7–8 KB para el sketch. Los LEDs del RJ45
 los controla el sketch (ver ejemplo `08_LedsRJ45`); no los usa la pila.
+
+### Bluetooth LE (librería `BLE_CH579`)
+
+Usa la radio de 2,4 GHz del CH579 con la pila BLE 4.2 oficial de WCH (`CH57xBLE.LIB`,
+incluida como `libCH57xBLE.a`). Un rol por programa; en periférico y central los datos
+viajan por el **Nordic UART Service**, así que `BLE` se usa como `Serial`:
+
+```cpp
+#include <BLE_CH579.h>
+BLE.beginPeripheral("CH579-UART");        // el móvil se conecta
+...
+BLE.poll();                               // en loop(); delay() también atiende la pila
+if (BLE.available()) Serial.write(BLE.read());
+BLE.println("hola movil");
+```
+
+| Ejemplo (Archivo → Ejemplos → BLE_CH579) | Rol | Qué hace |
+|---|---|---|
+| BLE_Baliza | difusor | Anuncia nombre, un contador y A0 en los datos de fabricante |
+| BLE_iBeacon | difusor | Baliza iBeacon (UUID, major, minor) o Eddystone-URL |
+| BLE_Escaner | observador | Lista los equipos BLE cercanos: MAC, RSSI y nombre |
+| BLE_UART | periférico | Puente Monitor Serie ↔ móvil (Serial Bluetooth Terminal, nRF Connect, nRF Toolbox) |
+| BLE_ControlLED | periférico | Órdenes desde el móvil: `on`, `off`, `blink N`, `a0`, `auto`, `info` |
+| BLE_CentralUART | central | Busca otra CH579 con BLE_UART, se conecta y hace de puente (dos placas) |
+
+Requisitos y límites:
+- **Reloj del sistema: Cristal externo 32 MHz (HSE)** (si no, no compila: la radio lo necesita).
+- La pila usa el **RTC** (con el RC de 32 kHz calibrado; no hace falta cristal de 32,768 kHz)
+  y reserva los **últimos 512 bytes de la DataFlash**: con BLE, use `EEPROM` solo en las
+  direcciones **0–1535**.
+- Ocupa ~55 KB de flash (observador) a ~86 KB (central) y ~9 KB de RAM.
+- No guarda emparejamientos; los ejemplos no necesitan emparejar desde los ajustes del móvil.
+- Define `yield()` para atender la pila dentro de `delay()`.
+- No combinar BLE y Ethernet en el mismo programa (no se ha probado y la RAM no alcanza
+  con la configuración actual de Ethernet).
 
 ### Detalles del hardware a tener en cuenta
 
@@ -184,7 +226,7 @@ debug.server.jlink.path=C:/Program Files/SEGGER/JLink_V812/JLinkGDBServerCL.exe
 boards.txt / platform.txt     definición de la placa y del proceso de compilación
 cores/arduino/                core Arduino + ArduinoCore-API (api/) + SDK de WCH (sdk/)
 variants/ch579m_v16/          mapa de pines y linker script (ch579.ld)
-libraries/                    SPI, Wire, EEPROM, Ethernet (CH579), LCD_HD44780, OLED_SSD1306,
+libraries/                    SPI, Wire, EEPROM, Ethernet (CH579), BLE_CH579, LCD_HD44780, OLED_SSD1306,
                               HCSR04_CH579, NTC_Thermistor, CH579_Log y los ejemplos de la placa (CH579M)
 tools/jlink/                  scripts de carga + JLinkDevices.xml + CH57x.FLM
 svd/CH579SFR.svd              registros para el depurador
@@ -193,7 +235,7 @@ svd/CH579SFR.svd              registros para el depurador
 ## Licencias
 
 - `cores/arduino/api/`: ArduinoCore-API, LGPL 2.1.
-- `cores/arduino/sdk/`, `libraries/Ethernet/src/cortex-m0/libCH57xNET.a`, `CH57xNET.h`, `tools/jlink/CH579M/CH57x.FLM`, `svd/`: material de WCH. Su licencia
+- `cores/arduino/sdk/`, `libraries/Ethernet/src/cortex-m0/libCH57xNET.a`, `CH57xNET.h`, `libraries/BLE_CH579/src/cortex-m0/libCH57xBLE.a`, `CH57xBLE_LIB.h`, `tools/jlink/CH579M/CH57x.FLM`, `svd/`: material de WCH. Su licencia
   no está especificada; el repositorio es privado mientras se aclara la redistribución.
 - El resto (core, variante, librerías y scripts): escrito para este proyecto. Las librerías
   de pantallas y sensores están portadas de la HAL `Hal_CH57xx_*` de Carlos Pacheco (CEPH81).
