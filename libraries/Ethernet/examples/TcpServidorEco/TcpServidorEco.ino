@@ -14,7 +14,7 @@ void setup() {
   delay(100);
   Serial.println("\r\n=== CH579M Ethernet: TcpServidorEco ===");
   Ethernet.setDebug(Serial);        // muestra cada paso: enlace, DHCP...
-  if (!Ethernet.begin(nullptr, 20000)) Ethernet.begin(IPAddress(192, 168, 1, 200));
+  Ethernet.beginAuto();            // DHCP, o 169.254.x.y si va directo al PC
   servidor.begin();
   Serial.print("Servidor de eco en ");
   Serial.print(Ethernet.localIP());

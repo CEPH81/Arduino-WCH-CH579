@@ -33,10 +33,7 @@ void setup() {
   delay(100);
   Serial.println("\r\n=== CH579M Ethernet: TcpCliente ===");
   Ethernet.setDebug(Serial);        // muestra cada paso: enlace, DHCP...
-  if (!Ethernet.begin(nullptr, 20000)) {                      // DHCP
-    Serial.println("Sin DHCP: usando IP fija 192.168.1.200");
-    Ethernet.begin(IPAddress(192, 168, 1, 200));
-  }
+  Ethernet.beginAuto();            // DHCP, o 169.254.x.y si va directo al PC
   Serial.print("Mi IP: ");
   Serial.println(Ethernet.localIP());
   conectar();

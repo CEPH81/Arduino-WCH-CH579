@@ -40,6 +40,13 @@ public:
     void begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway);
     void begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress gateway, IPAddress subnet);
     void begin(IPAddress ip) { begin(nullptr, ip); }
+
+    /* IP 169.254.x.y sacada de la MAC (mascara 255.255.0.0): para conectar la
+     * placa directo al puerto LAN del PC, sin router (el PC usa la misma red) */
+    void beginLinkLocal(uint8_t *mac = nullptr);
+    /* DHCP y, si no hay servidor (conexion directa al PC), IP de enlace local.
+     * Devuelve 1 = DHCP, 2 = enlace local 169.254.x.y, 0 = sin cable */
+    int beginAuto(uint8_t *mac = nullptr, unsigned long timeout = 15000);
     void begin(IPAddress ip, IPAddress dns, IPAddress gateway, IPAddress subnet = IPAddress(255, 255, 255, 0))
         { begin(nullptr, ip, dns, gateway, subnet); }
 

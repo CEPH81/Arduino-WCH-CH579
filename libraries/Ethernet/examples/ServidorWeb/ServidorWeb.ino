@@ -35,7 +35,7 @@ void setup() {
   Serial.println("\r\n=== CH579M Ethernet: ServidorWeb ===");
   Ethernet.setDebug(Serial);        // muestra cada paso: enlace, DHCP...
   pinMode(LED_BUILTIN, OUTPUT);
-  if (!Ethernet.begin(nullptr, 20000)) Ethernet.begin(IPAddress(192, 168, 1, 200));
+  Ethernet.beginAuto();            // DHCP, o 169.254.x.y si va directo al PC
   servidor.begin();
   Serial.print("Abra http://");
   Serial.println(Ethernet.localIP());

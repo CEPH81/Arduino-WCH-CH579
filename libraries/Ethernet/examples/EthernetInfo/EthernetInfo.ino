@@ -1,7 +1,8 @@
 /*
  * EthernetInfo - Diagnostico de la red: enlace, DHCP y configuracion.
  *
- * Conecte el RJ45 de la placa a su router/switch y abra el Monitor Serie
+ * Conecte el RJ45 de la placa a su router/switch (o directo al puerto LAN del
+ * PC, ver ConexionDirectaPC) y abra el Monitor Serie
  * (puerto del CH340, 115200). Muestra cada paso; si algo falla dice donde.
  * Con IP asignada, haga "ping" a esa IP desde el PC.
  */
@@ -39,8 +40,9 @@ void setup() {
   Serial.print("MAC:       "); printMAC();
   printPHY();
   if (!dhcp) {
-    Serial.println("Sin DHCP: se usa IP fija 192.168.1.200");
-    Ethernet.begin(IPAddress(192, 168, 1, 200));
+    /* sin router (por ejemplo, cable directo al PC): IP 169.254.x.y, la misma
+       red que se pone el PC solo en su puerto LAN */
+    Ethernet.beginLinkLocal();
   }
   Serial.print("IP:        "); Serial.println(Ethernet.localIP());
   Serial.print("Mascara:   "); Serial.println(Ethernet.subnetMask());

@@ -78,9 +78,36 @@ void EthernetClass::begin(uint8_t *mac, IPAddress ip, IPAddress dns, IPAddress g
     uint8_t i[4], g[4], m[4];
     ip_to_bytes(ip, i); ip_to_bytes(gateway, g); ip_to_bytes(subnet, m);
     _dns = dns;
-    dbg("[ETH] IP fija: iniciando pila TCP/IP... ");
-    dbg(init(mac, i, g, m) ? "OK\r\n" : "ERROR\r\n");
+    if (net_ready()) {
+        /* la pila ya estaba iniciada (por ejemplo, fallo el DHCP): cambiar la IP */
+        dbg("[ETH] IP fija: reconfigurando la pila... ");
+        dbg(net_set_static(i, g, m) == 0 ? "OK\r\n" : "ERROR\r\n");
+    } else {
+        dbg("[ETH] IP fija: iniciando pila TCP/IP... ");
+        dbg(init(mac, i, g, m) ? "OK\r\n" : "ERROR\r\n");
+    }
     dbg(waitForLink(3000) ? "[ETH] Enlace OK\r\n" : "[ETH] Aun sin enlace (revise el cable)\r\n");    /* no es obligatorio: la pila funciona en cuanto haya enlace */
+}
+
+/* IP 169.254.x.y (RFC 3927, sacada de la MAC): la misma red que se pone
+ * Windows/Linux/macOS en un puerto Ethernet sin DHCP. Placa conectada directo
+ * al PC con un cable: los dos se ven sin configurar nada. */
+void EthernetClass::beginLinkLocal(uint8_t *mac)
+{
+    uint8_t m[6];
+    if (!net_ready()) init(mac, nullptr, nullptr, nullptr);
+    net_get_mac(m);
+    IPAddress ip(169, 254, 1 + m[4] % 254, 1 + m[5] % 254);
+    dbg("[ETH] Sin DHCP: IP de enlace local (conexion directa al PC)\r\n");
+    begin(mac, ip, IPAddress(0, 0, 0, 0), IPAddress(0, 0, 0, 0), IPAddress(255, 255, 0, 0));
+}
+
+int EthernetClass::beginAuto(uint8_t *mac, unsigned long timeout)
+{
+    if (begin(mac, timeout)) return 1;
+    if (!net_link_up()) return 0;          /* sin cable no tiene sentido seguir */
+    beginLinkLocal(mac);
+    return 2;
 }
 
 int EthernetClass::maintain(void)

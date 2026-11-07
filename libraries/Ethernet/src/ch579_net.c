@@ -285,6 +285,34 @@ uint16_t net_phy_read(uint8_t reg)
     return R16_ETH_MIRD;
 }
 
+/* ------------------------------------------------- IP fija despues de iniciar
+ * La pila de WCH no tiene una funcion para cambiar la IP: se detiene el DHCP
+ * y se vuelve a iniciar con la nueva (por ejemplo cuando el DHCP fallo porque
+ * la placa esta conectada directo al PC, sin router). */
+int net_set_static(const uint8_t ip[4], const uint8_t gw[4], const uint8_t mask[4])
+{
+    NVIC_DisableIRQ(ETH_IRQn);
+    CH57xNET_DHCPStop();
+    s_dhcp_state = -1;
+    for (int i = 0; i < NET_MAX_SOCKETS; i++) sock_reset(i);
+
+    CH57xNETConfig = LIB_CFG_VALUE;
+    struct _CH57x_CFG cfg;
+    cfg.RxBufSize   = RX_BUF_SIZE;
+    cfg.TCPMss      = CH57xNET_TCP_MSS;
+    cfg.HeapSize    = CH57x_MEM_HEAP_SIZE;
+    cfg.ARPTableNum = CH57xNET_NUM_ARP_TABLE;
+    cfg.MiscConfig0 = CH57xNET_MISC_CONFIG0;
+    CH57xNET_ConfigLIB(&cfg);
+    uint8_t r = CH57xNET_Init(ip, gw, mask, MACAddr);
+    if (r == CH57xNET_ERR_SUCCESS) {
+        struct _KEEP_CFG kl = { 20000, 10000, 5 };
+        CH57xNET_ConfigKeepLive(&kl);
+    }
+    NVIC_EnableIRQ(ETH_IRQn);
+    return r == CH57xNET_ERR_SUCCESS ? 0 : r;
+}
+
 /* ------------------------------------------------- DHCP */
 static UINT8 dhcp_cb(UINT8 status, void *arg)
 {
